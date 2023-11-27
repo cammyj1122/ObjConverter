@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>Prog 2: Rasterization Shell</title>
+
+    <link rel="icon" type="image/x-icon" href="favicon.ico" />
+
+    <script type="text/javascript" src="jquery.min.js"></script>
+    <script type="text/javascript" src="convert.js"></script>
+
+    <style>
+      body {
+        overflow: hidden;
+      }
+
+      #container {
+        display: flex;
+        justify-content: space-between;
+      }
+
+      #convertWrapper {
+        display: flex;
+        position: absolute;
+        transition: all 1s ease;
+        z-index: 5;
+      }
+
+      .border {
+        border: solid 1px black;
+      }
+
+      #convertContent {
+        position: relative;
+        padding: 20px;
+        padding-top: 50px;
+        width: 580px;
+        box-sizing: border-box;
+        background: white;
+      }
+
+      #sidebarWrapper {
+        position: absolute;
+        right: 0;
+        left: 0;
+        display: flex;
+        justify-content: center;
+      }
+
+      .browseInput > * {
+        margin: 10px 0;
+      }
+
+      .browseInput > *,
+      #downloadWrapper {
+        display: flex;
+        justify-content: space-between;
+      }
+
+      .browseInput {
+        margin: 20px 0;
+      }
+      .subDown > * {
+        margin-bottom: 10px;
+      }
+
+      #loading {
+        position: absolute;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+
+        top: 0;
+        right: 0;
+        z-index: 20;
+
+        width: 100%;
+        height: 100%;
+        background: rgba(1, 1, 1, 0.35);
+      }
+
+      .hidden {
+        visibility: hidden;
+      }
+
+      .loader {
+        border: 10px solid #f3f3f3; /* Light grey */
+        border-top: 10px solid #a61616; /* Blue */
+        border-radius: 50%;
+        width: 30px;
+        height: 30px;
+        animation: spin 2s linear infinite;
+      }
+
+      @keyframes spin {
+        0% {
+          transform: rotate(0deg);
+        }
+        100% {
+          transform: rotate(360deg);
+        }
+      }
+    </style>
+  </head>
+
+  <body>
+    <div id="container" class="">
+      <div id="sidebarWrapper">
+        <div id="loading"></div>
+        <div id="convertWrapper" class="">
+          <div id="convertContent" class="border">
+            <div id="loading" class="hidden">
+              <!--<div id="loaderWrapper">-->
+              <div class="loader"></div>
+              <!--</div>-->
+            </div>
+            Here is the convert form. This will allow a file to be uploaded,
+            converted, and downloaded as a new model file.
+
+            <div class="browseInput">
+              <div class="matContainer">
+                <label for="matpicker">Material: </label>
+                <input type="file" id="matpicker" accept=".mtl" />
+              </div>
+              <div class="objContainer">
+                <label for="objpicker">Object: </label>
+                <input type="file" id="objpicker" accept=".obj" />
+              </div>
+            </div>
+
+            <div class="subDown">
+              <button onclick="convert()">Submit!</button>
+
+              <div id="downloadWrapper">
+                <button id="dwnBtn" onclick="download()" disabled>
+                  Download!
+                </button>
+
+                <span id="downloadMsg"></span>
+              </div>
+
+              <button onclick="clear()">Clear</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
