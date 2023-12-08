@@ -9,15 +9,16 @@ var matAmbiRegex = /Ka(?<r> -?\d+\.\d+)(?<g> -?\d+\.\d+)(?<b> -?\d+\.\d+)/;
 var matDiffRegex = /Kd(?<r> -?\d+\.\d+)(?<g> -?\d+\.\d+)(?<b> -?\d+\.\d+)/;
 var matSpecRegex = /Ks(?<r> -?\d+\.\d+)(?<g> -?\d+\.\d+)(?<b> -?\d+\.\d+)/;
 var matAlphaRegex = /^d(?<alpha> -?\d+\.\d+)/;
-var matTextRegex = /map_Kd (?<text>.*)/;
+var matTextRegex = /map_Kd (\/(?<text>[^\/]*\.*\w*))*/;
+//var matTextRegex = /map_Kd (?<text>.*)/;
 
 // Object Regex
 var vertexRegex = /^v(?<x> -?\d+\.\d+)(?<y> -?\d+\.\d+)(?<z> -?\d+\.\d+)$/;
 var normalRegex = /^vn(?<x> -?\d+\.\d+)(?<y> -?\d+\.\d+)(?<z> -?\d+\.\d+)$/;
 var textureRegex = /^vt(?<u> -?\d+\.\d+)(?<v> -?\d+\.\d+)$/;
-var faceReg = /^f( \d+(\/\d+)(\/\d+)){3}|^f( \d+){3}/g;
+var faceReg = /^f( \d+(\/\d+)(\/\d+)){3,}|^f( \d+){3,}/g;
 var splitReg = /(?<v>\d+)(\/(?<t>\d*)\/(?<n>\d*))?/g;
-var objectRegex = /^o (.*)$/;
+var objectRegex = /^o (?<name>.*)$/;
 var useMatRegex = /^(newmtl|usemtl) (?<name>.*)$/;
 
 function toggleHidden() {
@@ -184,7 +185,7 @@ function readFile(file) {
             obj.norms = norms;
             obj.texts = texts;
           }
-          initObj();
+          initObj(match.groups.name);
         } else if ((match = snippet.match(useMatRegex))) {
           //console.log(match);
           var found = mats.find(
@@ -284,8 +285,9 @@ function readFile(file) {
     }
   };
 
-  function initObj() {
+  function initObj(objName) {
     obj = {
+      name: objName,
       vertices: [],
       normals: [],
       uvs: [],
