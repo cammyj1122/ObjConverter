@@ -139,7 +139,9 @@ function readMaterial(file) {
     loadChunk(start, end);
   });
 }
-convert;
+
+//convert;
+
 function readFile(file) {
   let fr = new FileReader();
   let CHUNK_SIZE = 10 * 1024;
@@ -315,6 +317,166 @@ function readFile(file) {
   loadChunk(start, end);
 }
 
+function readFileTest(file) {
+  function initObj(objName) {
+    obj = {
+      name: objName,
+      vertices: [],
+      normals: [],
+      uvs: [],
+      verts: [],
+      norms: [],
+      texts: [],
+      triangles: [],
+      materials: [],
+    };
+
+    materialCount = -1;
+  }
+
+  // Material
+  //{
+  //  name: "",
+  //  ambient: [],
+  //  diffuse: [],
+  //  specular: [],
+  //  n: 0,
+  //  alpha: 1.0,
+  //  texture: "",
+  //},
+
+  objs = [];
+  var obj = null;
+
+  var vertCount = 0;
+  var normCount = 0;
+  var textCount = 0;
+  var materialCount = -1;
+
+  var verticies = [];
+  var norms = [];
+  var texts = [];
+
+  var fr = new FileReader();
+
+  fr.onload = function () {
+    let text = fr.result;
+
+    var lines = text.split(/[\r\n]+/g);
+
+    lines.forEach(function (line) {
+      var match;
+
+      if ((match = line.match(objectRegex))) {
+        if (obj) {
+          //vertCount += obj.vertices.length;
+          //normCount += obj.normals.length;
+          //textCount += obj.uvs.length;
+          objs.push(obj);
+
+          obj.verts = verticies;
+          obj.norms = norms;
+          obj.texts = texts;
+        }
+        initObj(match.groups.name);
+      } else if ((match = line.match(useMatRegex))) {
+        //console.log(match);
+        var found = mats.find((material) => material.name == match.groups.name);
+        if (found) {
+          obj.materials.push(found.material);
+          materialCount++;
+        }
+
+        //obj.material.name = match.groups.name;
+      } else if ((match = line.match(vertexRegex))) {
+        //console.log(match);
+        obj.vertices.push([
+          parseFloat(match.groups.x),
+          parseFloat(match.groups.y),
+          parseFloat(match.groups.z),
+        ]);
+        verticies.push([
+          parseFloat(match.groups.x),
+          parseFloat(match.groups.y),
+          parseFloat(match.groups.z),
+        ]);
+      } else if ((match = line.match(normalRegex))) {
+        obj.normals.push([
+          parseFloat(match.groups.x),
+          parseFloat(match.groups.y),
+          parseFloat(match.groups.z),
+        ]);
+        norms.push([
+          parseFloat(match.groups.x),
+          parseFloat(match.groups.y),
+          parseFloat(match.groups.z),
+        ]);
+      } else if ((match = line.match(textureRegex))) {
+        obj.uvs.push([parseFloat(match.groups.u), parseFloat(match.groups.v)]);
+        texts.push([parseFloat(match.groups.u), parseFloat(match.groups.v)]);
+      } else if ((match = line.match(faceReg))) {
+        var final = match[0].matchAll(splitReg);
+        triangle = {
+          verts: [],
+          material: materialCount,
+        };
+
+        var arr = Array.from(match[0].matchAll(splitReg));
+
+        if (arr.length == 3) {
+          for (let fin of final) {
+            triangle.verts.push({
+              v: parseFloat(fin.groups.v) - vertCount,
+              vt: parseFloat(fin.groups.t) - textCount,
+              vn: parseFloat(fin.groups.n) - normCount,
+            });
+          }
+
+          obj.triangles.push(triangle);
+        } else {
+          for (let k = 1; k < arr.length - 1; k++) {
+            triangle = {
+              verts: [],
+              material: materialCount,
+            };
+
+            triangle.verts.push({
+              v: parseFloat(arr[0][1]) - vertCount,
+              vt: parseFloat(arr[0][3]) - textCount,
+              vn: parseFloat(arr[0][4]) - normCount,
+            });
+            triangle.verts.push({
+              v: parseFloat(arr[k][1]) - vertCount,
+              vt: parseFloat(arr[k][3]) - textCount,
+              vn: parseFloat(arr[k][4]) - normCount,
+            });
+            triangle.verts.push({
+              v: parseFloat(arr[k + 1][1]) - vertCount,
+              vt: parseFloat(arr[k + 1][3]) - textCount,
+              vn: parseFloat(arr[k + 1][4]) - normCount,
+            });
+
+            obj.triangles.push(triangle);
+          }
+        }
+      }
+    });
+
+    obj.verts = verticies;
+    obj.norms = norms;
+    obj.texts = texts;
+    objs.push(obj);
+    console.log(objs);
+
+    $("#downloadMsg").text(modelName + " model is ready.");
+    document.getElementById("dwnBtn").disabled = false;
+
+    toggleHidden();
+  };
+
+  fr.readAsText(file);
+}
+
 function convert() {
   toggleHidden();
   let objfile = $("#objpicker")[0].files[0];
@@ -325,10 +487,11 @@ function convert() {
 
     if (matfile) {
       readMaterial(matfile).then(() => {
-        readFile(objfile);
+        //readFile(objfile);
+        readFileTest(objfile);
       });
     } else {
-      readFile(objfile);
+      //readFileTest(objfile);
     }
   } else {
     console.log("No Object File!");
